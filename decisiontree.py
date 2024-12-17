@@ -6,6 +6,100 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
 
+
+class DecisionTree:
+    def __init__(self, max_depth=None):
+        self.max_depth = max_depth
+        self.tree = None
+
+    # Hàm tính Entropy
+    def _entropy(self, y):
+        unique_classes, counts = np.unique(y, return_counts=True)
+        probabilities = counts / len(y)
+        entropy = -np.sum(probabilities * np.log2(probabilities))
+        return entropy
+
+    # Hàm tính Information Gain
+    def _information_gain(self, y, y_left, y_right):
+        parent_entropy = self._entropy(y)
+        n = len(y)
+        n_left, n_right = len(y_left), len(y_right)
+        weighted_entropy = (n_left / n) * self._entropy(y_left) + (n_right / n) * self._entropy(y_right)
+        gain = parent_entropy - weighted_entropy
+        return gain
+
+    # Hàm tìm thuộc tính tốt nhất để phân chia
+    def _best_split(self, X, y):
+        best_gain = -1
+        best_feature = None
+        best_threshold = None
+
+        for feature_idx in range(X.shape[1]):
+            thresholds = np.unique(X[:, feature_idx])
+            for threshold in thresholds:
+                y_left = y[X[:, feature_idx] <= threshold]
+                y_right = y[X[:, feature_idx] > threshold]
+                if len(y_left) == 0 or len(y_right) == 0:
+                    continue
+                gain = self._information_gain(y, y_left, y_right)
+                if gain > best_gain:
+                    best_gain = gain
+                    best_feature = feature_idx
+                    best_threshold = threshold
+
+        return best_feature, best_threshold
+
+    # Hàm xây dựng cây đệ quy
+    def _build_tree(self, X, y, depth=0):
+        unique_classes, counts = np.unique(y, return_counts=True)
+        majority_class = unique_classes[np.argmax(counts)]
+
+        # Điều kiện dừng
+        if len(unique_classes) == 1 or depth == self.max_depth:
+            return {"leaf": True, "class": majority_class}
+
+        # Tìm thuộc tính phân chia tốt nhất
+        feature, threshold = self._best_split(X, y)
+        if feature is None:
+            return {"leaf": True, "class": majority_class}
+
+        left_idx = X[:, feature] <= threshold
+        right_idx = X[:, feature] > threshold
+
+        left_tree = self._build_tree(X[left_idx], y[left_idx], depth + 1)
+        right_tree = self._build_tree(X[right_idx], y[right_idx], depth + 1)
+
+        return {
+            "leaf": False,
+            "feature": feature,
+            "threshold": threshold,
+            "left": left_tree,
+            "right": right_tree
+        }
+
+    # Hàm khớp dữ liệu
+    def fit(self, X, y):
+        self.tree = self._build_tree(np.array(X), np.array(y))
+
+    # Hàm dự đoán
+    def _predict(self, x, tree):
+        if tree["leaf"]:
+            return tree["class"]
+
+        feature = tree["feature"]
+        threshold = tree["threshold"]
+        if x[feature] <= threshold:
+            return self._predict(x, tree["left"])
+        else:
+            return self._predict(x, tree["right"])
+
+    def predict(self, X):
+        return np.array([self._predict(x, self.tree) for x in np.array(X)])
+
+
+
+
+
 # Khởi tạo app
 app = FastAPI()
 
