@@ -49,7 +49,7 @@ class DecisionTree:
 
         return best_feature, best_threshold
 
-    # Hàm xây dựng cây đệ quy.
+    # Hàm xây dựng cây đệ quy
     def _build_tree(self, X, y, depth=0):
         unique_classes, counts = np.unique(y, return_counts=True)
         majority_class = unique_classes[np.argmax(counts)]
