@@ -228,7 +228,7 @@ async def recommend_anime(request: Request):
     # Nếu người dùng đánh giá ít anime, sử dụng một phương pháp thay thế
     if len(rated_anime_ids) < 10:
         # Gợi ý những anime phổ biến (ví dụ: top anime theo số lượng người xem hoặc yêu thích)
-        popular_anime = anime_df.sort_values(by='Favorites', ascending=False).head(n)
+        popular_anime = anime_df.sort_values(by='Favorites', ascending=False).head(n)[['Anime_id', 'Name','English name','Score', 'Genres', 'Synopsis','Type','Episodes','Duration', 'Favorites','Scored By','Members','Image URL','Old', 'JapaneseLevel']]
         return {"recommended_anime": popular_anime.to_dict(orient="records")}
     
     clf = train_decision_tree(user_id)
