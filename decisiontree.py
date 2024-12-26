@@ -186,25 +186,15 @@ def get_user_features(user_id):
     
     # First, assign to user_anime_df, then check its length
     user_anime_df = anime_df[anime_df['Anime_id'].isin(user_ratings_df['Anime_id'])]
+    # Calculate features from the user's ratings
+    features['Avg_Old'] = user_anime_df['AgeCategory'].apply(lambda x: 1 if x == 1 else 0).mean()
+    features['Avg_Favorites'] = user_anime_df['Favorites_'].mean()
+    features['Avg_JapaneseLevel'] = user_anime_df['JapaneseLevel_'].mean()
+    features['Avg_Score'] = user_anime_df['Score_'].mean()
 
-    if len(user_anime_df) < 10:
-        features['Avg_Old'] = 0.5
-        features['Avg_Favorites'] = 0.5
-        features['Avg_JapaneseLevel'] = 0.5
-        features['Avg_Score'] = 0.5
-
-        for genre in genres:
-            features[f'Avg_{genre}'] = 0.5
-    else:
-        # Calculate features from the user's ratings
-        features['Avg_Old'] = user_anime_df['AgeCategory'].apply(lambda x: 1 if x == 1 else 0).mean()
-        features['Avg_Favorites'] = user_anime_df['Favorites_'].mean()
-        features['Avg_JapaneseLevel'] = user_anime_df['JapaneseLevel_'].mean()
-        features['Avg_Score'] = user_anime_df['Score_'].mean()
-
-        # Calculate average value for each genre
-        for genre in genres:
-            features[f'Avg_{genre}'] = user_anime_df[genre].mean()
+    # Calculate average value for each genre
+    for genre in genres:
+        features[f'Avg_{genre}'] = user_anime_df[genre].mean()
 
     return features
 
@@ -231,6 +221,16 @@ async def recommend_anime(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
     n = data.get("n", 10)  # Số lượng gợi ý, mặc định là 10
+    # Lấy danh sách anime mà người dùng đã đánh giá
+    user_ratings = get_user_ratings(user_id)
+    rated_anime_ids = [rating['Anime_id'] for rating in user_ratings]
+
+    # Nếu người dùng đánh giá ít anime, sử dụng một phương pháp thay thế
+    if len(rated_anime_ids) < 10:
+        # Gợi ý những anime phổ biến (ví dụ: top anime theo số lượng người xem hoặc yêu thích)
+        popular_anime = anime_df.sort_values(by='Favorites', ascending=False).head(n)
+        return {"recommended_anime": popular_anime.to_dict(orient="records")}
+    
     clf = train_decision_tree(user_id)
     anime_features = anime_df[genres + ['Favorites_', 'JapaneseLevel_', 'AgeCategory', 'Score_']]
     predictions = clf.predict(anime_features)
