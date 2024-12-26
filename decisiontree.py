@@ -186,10 +186,10 @@ def get_user_features(user_id):
     
     ## nếu người dùng ít đánh giá sẽ khởi tạo giá trị mặc định
     if user_ratings_df.empty or len(user_ratings_df) < 10:
-        features['Avg_Old'] = 1
-        features['Avg_Favorites'] = 1
-        features['Avg_JapaneseLevel'] = 1
-        features['Avg_Score'] = 1
+        features['Avg_Old'] = 0.5
+        features['Avg_Favorites'] = 0.5
+        features['Avg_JapaneseLevel'] = 0.5
+        features['Avg_Score'] = 0.5
 
         for genre in genres:
             features[f'Avg_{genre}'] = 0.5
