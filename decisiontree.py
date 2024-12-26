@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request
 from pymongo import MongoClient
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
@@ -12,14 +11,12 @@ class DecisionTree:
         self.max_depth = max_depth
         self.tree = None
 
-    # Hàm tính Entropy
     def _entropy(self, y):
         unique_classes, counts = np.unique(y, return_counts=True)
         probabilities = counts / len(y)
         entropy = -np.sum(probabilities * np.log2(probabilities))
         return entropy
 
-    # Hàm tính Information Gain
     def _information_gain(self, y, y_left, y_right):
         parent_entropy = self._entropy(y)
         n = len(y)
@@ -28,7 +25,6 @@ class DecisionTree:
         gain = parent_entropy - weighted_entropy
         return gain
 
-    # Hàm tìm thuộc tính tốt nhất để phân chia
     def _best_split(self, X, y):
         best_gain = -1
         best_feature = None
@@ -48,17 +44,14 @@ class DecisionTree:
                     best_threshold = threshold
 
         return best_feature, best_threshold
-
-    # Hàm xây dựng cây đệ quy
+    
     def _build_tree(self, X, y, depth=0):
         unique_classes, counts = np.unique(y, return_counts=True)
         majority_class = unique_classes[np.argmax(counts)]
 
-        # Điều kiện dừng
         if len(unique_classes) == 1 or depth == self.max_depth:
             return {"leaf": True, "class": majority_class}
 
-        # Tìm thuộc tính phân chia tốt nhất
         feature, threshold = self._best_split(X, y)
         if feature is None:
             return {"leaf": True, "class": majority_class}
@@ -77,11 +70,9 @@ class DecisionTree:
             "right": right_tree
         }
 
-    # Hàm khớp dữ liệu
     def fit(self, X, y):
         self.tree = self._build_tree(np.array(X), np.array(y))
 
-    # Hàm dự đoán
     def _predict(self, x, tree):
         if tree["leaf"]:
             return tree["class"]
@@ -220,7 +211,7 @@ def train_decision_tree(user_id):
     X = anime_features
     y = anime_df['Score_']
 
-    clf = DecisionTreeClassifier(random_state=42)
+    clf = DecisionTree(max_depth=3)
     clf.fit(X, y)
 
     return clf
