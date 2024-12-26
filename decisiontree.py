@@ -124,8 +124,6 @@ def get_user_ratings(user_id):
 # Lấy dữ liệu Anime
 anime_df = get_anime_data()
 anime_df2 = anime_df
-user_ratings = get_user_ratings(19)
-user_ratings_df = pd.DataFrame(user_ratings)
 # Cập nhật để phân loại cột 'Score' theo các điều kiện
 def categorize_score(score):
     if score < 8:
@@ -202,15 +200,17 @@ def get_user_features(user_id):
     return features
 
 def train_decision_tree(user_id):
+    # Lấy đặc trưng của người dùng
     user_features = get_user_features(user_id)
+    user_ratings = get_user_ratings(user_id)
+    rated_anime_ids = [rating['Anime_id'] for rating in user_ratings]
+
+    # Tạo tập dữ liệu
     anime_features = anime_df[genres + ['Favorites_', 'JapaneseLevel_', 'AgeCategory', 'Score_']]
-    user_feature_vector = np.array([user_features[f'Avg_{genre}'] for genre in genres] +
-                                   [user_features['Avg_Favorites'], user_features['Avg_JapaneseLevel'],
-                                    user_features['Avg_Old'], user_features['Avg_Score']])
+    X = anime_features.values
+    y = np.array([1 if anime_id in rated_anime_ids else 0 for anime_id in anime_df['Anime_id']])
 
-    X = anime_features
-    y = anime_df['Score_']
-
+    # Huấn luyện mô hình Decision Tree
     clf = DecisionTree(max_depth=3)
     clf.fit(X, y)
 
