@@ -182,18 +182,20 @@ anime_df['AgeCategory'] = anime_df['Old'].apply(categorize_age)
 def get_user_features(user_id):
     user_ratings = get_user_ratings(user_id)
     user_ratings_df = pd.DataFrame(user_ratings)
+    features = {}
     
+    ## nếu người dùng ít đánh giá sẽ khởi tạo giá trị mặc định
     if user_ratings_df.empty or len(user_ratings_df) < 10:
-        # Nếu người dùng có ít đánh giá, sử dụng giá trị trung bình từ toàn bộ DataFrame
-        features = anime_df[['Old', 'Favorites_', 'JapaneseLevel_', 'AgeCategory', 'Score_']].mean(axis=0).to_dict()
-        
-        # Tính giá trị trung bình cho tất cả các cột 'Avg_' cho mỗi thể loại
+        features['Avg_Old'] = 1
+        features['Avg_Favorites'] = 1
+        features['Avg_JapaneseLevel'] = 1
+        features['Avg_Score'] = 1
+
         for genre in genres:
-            features[f'Avg_{genre}'] = anime_df[genre].mean()
+            features[f'Avg_{genre}'] = 0.5
     else:
         # Nếu người dùng có nhiều đánh giá, tính toán đặc trưng từ đánh giá của họ
         user_anime_df = anime_df[anime_df['Anime_id'].isin(user_ratings_df['Anime_id'])]
-        features = {}
 
         # Tính toán các đặc trưng từ các đánh giá của người dùng
         features['Avg_Old'] = user_anime_df['AgeCategory'].apply(lambda x: 1 if x == 1 else 0).mean()
