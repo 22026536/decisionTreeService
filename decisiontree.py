@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
+import time
 
 
 class DecisionTree:
@@ -86,9 +87,6 @@ class DecisionTree:
 
     def predict(self, X):
         return np.array([self._predict(x, self.tree) for x in np.array(X)])
-
-
-
 
 
 # Khởi tạo app
