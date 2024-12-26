@@ -99,7 +99,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Thêm middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://anime-fawn-five.vercel.app"],  # Cho phép tất cả origin
+    allow_origins=["*"],  # Cho phép tất cả origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
