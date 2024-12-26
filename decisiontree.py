@@ -185,7 +185,7 @@ def get_user_features(user_id):
     features = {}
     
     ## nếu người dùng ít đánh giá sẽ khởi tạo giá trị mặc định
-    if user_ratings_df.empty or len(user_ratings_df) < 10:
+    if len(user_anime_df = anime_df[anime_df['Anime_id'].isin(user_ratings_df['Anime_id'])]) < 10:
         features['Avg_Old'] = 0.5
         features['Avg_Favorites'] = 0.5
         features['Avg_JapaneseLevel'] = 0.5
